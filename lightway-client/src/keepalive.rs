@@ -177,6 +177,7 @@ async fn keepalive<CONFIG: SleepManager, CONNECTION: Connection>(
                         continue
                     },
                     Message::ReplyReceived => {
+                        tracing::info!("Keepalive Pong received");
                         state = if config.continuous() {
                             State::Waiting
                         } else {
@@ -223,6 +224,7 @@ async fn keepalive<CONFIG: SleepManager, CONNECTION: Connection>(
             }
 
             _ = config.sleep_for_interval(), if matches!(state, State::Pending | State::Waiting) => {
+                tracing::info!("Sending keepalive Ping");
                 if let Err(e) = conn.keepalive() {
                     tracing::error!("Send Keepalive failed: {e:?}");
                 }
