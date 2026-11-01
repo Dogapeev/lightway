@@ -427,6 +427,7 @@ where
                     // backpressure, retry when writable (documented by the
                     // header).
                     let err = boring_sys::SSL_get_error(ssl_ptr, ret);
+                    tracing::warn!(ret, ssl_error = err, "DTLSv1_handle_timeout diagnostic");
                     match err {
                         boring_sys::SSL_ERROR_WANT_WRITE => super::Poll::PendingWrite,
                         boring_sys::SSL_ERROR_WANT_READ => super::Poll::PendingRead,
