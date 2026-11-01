@@ -96,8 +96,18 @@ impl Udp {
             }
         }
 
-        let default_ip_pmtudisc = sockopt::get_ip_mtu_discover(&sock)
-            .context("Failed to get IP MTU Discovery sockopt")?;
+        let default_ip_pmtudisc = match sockopt::get_ip_mtu_discover(&sock) {
+            Ok(value) => value,
+            #[cfg(apple)]
+            Err(err) => {
+                tracing::warn!(
+                    "Cannot read IP MTU Discovery socket option on Apple: {err}"
+                );
+                sockopt::IpPmtudisc::Dont
+            }
+            #[cfg(not(apple))]
+            Err(err) => return Err(err).context("Failed to get IP MTU Discovery sockopt"),
+        };
         // Check for the socket's writable ready status, so that it can be used
         // successfully in TLS's `OutsideIOSendCallback` callback
         sock.writable().await?;
