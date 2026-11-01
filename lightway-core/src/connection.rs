@@ -971,7 +971,7 @@ impl<AppState: Send> Connection<AppState> {
             }
             _ if self.connection_type.is_datagram() => match self.session.dtls_has_timed_out() {
                 crate::tls::Poll::Ready(true) => {
-                    warn!(session_id = ?self.session_id, "DTLS timed out, disconnecting client");
+                    warn!(session_id = ?self.session_id, state = ?self.state, tls_backend = %crate::tls::get_version_string(), "DTLS timed out, disconnecting client");
                     let _ = self.disconnect();
                     return Err(ConnectionError::TimedOut);
                 }
